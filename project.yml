@@ -1,0 +1,64 @@
+name: Odbitka
+options:
+  bundleIdPrefix: pl.froncek
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    SWIFT_STRICT_CONCURRENCY: complete
+
+packages:
+  OdbitkaKit:
+    path: Packages/OdbitkaKit
+
+targets:
+  Odbitka:
+    type: application
+    platform: iOS
+    sources:
+      - path: Odbitka
+    dependencies:
+      - package: OdbitkaKit
+      - target: OdbitkaShare
+        embed: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: pl.froncek.odbitka
+        INFOPLIST_FILE: Odbitka/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Odbitka/Odbitka.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        TARGETED_DEVICE_FAMILY: "1,2"
+        # Polski jest językiem źródłowym projektu; angielski to pełnoprawne tłumaczenie.
+        SWIFT_EMIT_LOC_STRINGS: YES
+
+  OdbitkaShare:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: OdbitkaShare
+      # Rozszerzenie dostaje tylko te pliki aplikacji, które nie sięgają po
+      # UIApplication.shared ani po bibliotekę zdjęć — jedno jest w rozszerzeniach
+      # niedostępne, drugie zbędne.
+      - path: Odbitka/Shared/Localization.swift
+      - path: Odbitka/Shared/ErrorPresentation.swift
+      - path: Odbitka/Shared/ShareSheet.swift
+      - path: Odbitka/Features/Settings/SettingsStore.swift
+      - path: Odbitka/Resources/Localizable.xcstrings
+    dependencies:
+      - package: OdbitkaKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: pl.froncek.odbitka.share
+        INFOPLIST_FILE: OdbitkaShare/Info.plist
+        CODE_SIGN_ENTITLEMENTS: OdbitkaShare/OdbitkaShare.entitlements
+        TARGETED_DEVICE_FAMILY: "1,2"

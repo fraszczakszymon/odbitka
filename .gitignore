@@ -1,0 +1,13 @@
+# Artefakty budowania
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+.swiftpm/
+.build/
+
+# Projekt Xcode jest generowany z project.yml przez XcodeGen — patrz AGENTS.md
+Odbitka.xcodeproj/
+
+# macOS
+.DS_Store
