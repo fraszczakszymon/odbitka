@@ -47,7 +47,7 @@ final class PhotoLibraryModel: NSObject, PHPhotoLibraryChangeObserver {
 
     /// Czytane w `deinit`, który nie jest izolowany do głównego aktora. Zapis następuje
     /// wyłącznie na głównym aktorze, więc wyścigu tu nie ma.
-    nonisolated(unsafe) private var isObserving = false
+    @ObservationIgnored nonisolated(unsafe) private var isObserving = false
 
     /// Obserwatora biblioteki rejestrujemy **dopiero po uzyskaniu dostępu**.
     ///
