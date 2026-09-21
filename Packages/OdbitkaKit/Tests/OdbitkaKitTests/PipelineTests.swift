@@ -280,13 +280,56 @@ struct SizeEstimatorTests {
         settings.targetSize = .longEdge(600)
 
         let estimate = try #require(await SizeEstimator.estimate(photos: photos, settings: settings))
+        #expect(estimate.isMeasured, "Przy plikach na dysku szacunek ma pochodzić z pomiaru")
         let actual = try await ConversionPipeline(workspace: workspace)
             .run(photos: photos, settings: settings, isNetworkAvailable: true) { _ in }
             .producedByteCount
 
-        let ratio = Double(estimate) / Double(actual)
+        let ratio = Double(estimate.bytes) / Double(actual)
         // Celowo luźny próg: szacunek z próbki jest z natury przybliżeniem i tak też
         // jest podpisany w interfejsie („~"). Test pilnuje tylko, żeby nie był absurdalny.
-        #expect(ratio > 0.5 && ratio < 2.0, "Szacunek \(estimate) wobec rzeczywistych \(actual)")
+        #expect(ratio > 0.5 && ratio < 2.0, "Szacunek \(estimate.bytes) wobec rzeczywistych \(actual)")
+    }
+
+    @Test("Zdjęcia wyłącznie w iCloud i tak dają liczbę, oznaczoną jako niemierzoną")
+    func fallsBackWhenNothingIsLocal() async throws {
+        let directory = try Fixtures.makeDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        // Dokładnie sytuacja z telefonu z włączoną optymalizacją pamięci: miniatury są
+        // lokalnie, oryginałów nie ma. Wcześniej estymator zwracał wtedy nil,
+        // a etykieta z rozmiarem znikała z ekranu bez żadnego wyjaśnienia.
+        var photos = try Fixtures.photos(count: 5, in: directory, width: 4032, height: 3024)
+        for index in photos.indices { photos[index].available = false }
+
+        var settings = ConversionSettings.default
+        settings.targetSize = .longEdge(1600)
+
+        let estimate = try #require(await SizeEstimator.estimate(photos: photos, settings: settings))
+        #expect(estimate.isMeasured == false)
+        #expect(estimate.bytes > 0)
+
+        // 5 zdjęć po 1600×1200 px przy jakości 85% to kilka megabajtów — liczba ma być
+        // w rozsądnym rzędzie wielkości, nie symboliczna.
+        #expect(estimate.bytes > 1_000_000 && estimate.bytes < 20_000_000, "Wyszło \(estimate.bytes) B")
+    }
+
+    @Test("Model zapasowy reaguje na jakość i format")
+    func nominalModelRespondsToSettings() {
+        var settings = ConversionSettings.default
+        settings.quality = 0.9
+        let high = SizeEstimator.nominalBytesPerPixel(for: settings)
+        settings.quality = 0.4
+        let low = SizeEstimator.nominalBytesPerPixel(for: settings)
+        #expect(low < high)
+
+        settings.format = .png
+        #expect(SizeEstimator.nominalBytesPerPixel(for: settings) > high, "PNG jest bezstratny")
+    }
+
+    @Test("Puste zaznaczenie nie produkuje liczby z sufitu")
+    func emptySelection() async {
+        let estimate = await SizeEstimator.estimate(photos: [], settings: .default)
+        #expect(estimate?.bytes == 0)
     }
 }

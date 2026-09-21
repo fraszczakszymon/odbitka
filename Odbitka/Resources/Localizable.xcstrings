@@ -2109,6 +2109,23 @@
           }
         }
       }
+    },
+    "settings.estimate.rough": {
+      "extractionState": "manual",
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "szacunek zgrubny"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rough estimate"
+          }
+        }
+      }
     }
   }
 }

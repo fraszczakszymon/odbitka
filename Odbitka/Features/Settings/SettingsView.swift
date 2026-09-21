@@ -208,11 +208,21 @@ struct SettingsView: View {
             }
             .font(.subheadline)
             .foregroundStyle(.secondary)
-        } else if let bytes = estimate.estimatedBytes {
-            // Tylda i słowo „szacunek" są tu celowo widoczne: rozmiar JPEG zależy
-            // od treści zdjęcia, więc przy mieszanym zaznaczeniu potrafi się rozjechać.
-            Text(L.f("settings.estimate.value", ByteFormatting.string(bytes)))
-                .font(.subheadline.weight(.semibold))
+        } else if let value = estimate.estimate {
+            VStack(alignment: .trailing, spacing: 1) {
+                // Tylda jest tu celowa: rozmiar JPEG zależy od treści zdjęcia,
+                // więc przy mieszanym zaznaczeniu potrafi się rozjechać.
+                Text(L.f("settings.estimate.value", ByteFormatting.string(value.bytes)))
+                    .font(.subheadline.weight(.semibold))
+                // Gdy zdjęcia siedzą w iCloud, nie mamy czego zmierzyć i liczba pochodzi
+                // z modelu. Użytkownik ma prawo wiedzieć, że to grubsze przybliżenie
+                // niż zwykle — zamiast domyślać się, czemu liczba nie trzyma się wyniku.
+                if !value.isMeasured {
+                    Text(L.s("settings.estimate.rough"))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
     }
 

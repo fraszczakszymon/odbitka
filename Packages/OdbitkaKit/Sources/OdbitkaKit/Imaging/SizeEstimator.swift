@@ -31,19 +31,30 @@ public struct SizeEstimator: Sendable {
         return Int((Double(width) * scale).rounded()) * Int((Double(height) * scale).rounded())
     }
 
+    /// Wynik szacowania wraz z informacją, skąd pochodzi.
+    public struct Estimate: Sendable, Equatable {
+        public let bytes: Int64
+        /// `false`, gdy nie udało się przetworzyć ani jednej próbki i liczba pochodzi
+        /// z modelu zamiast z pomiaru. Interfejs mówi wtedy użytkownikowi wprost,
+        /// że szacunek jest zgrubny.
+        public let isMeasured: Bool
+    }
+
     /// Szacuje łączny rozmiar wyniku.
     ///
-    /// - Returns: `nil`, gdy próbki nie udało się przetworzyć. Brak liczby jest lepszy
-    ///   niż liczba zmyślona — użytkownik zobaczy wtedy sam rozmiar źródeł.
+    /// - Returns: `nil` wyłącznie wtedy, gdy nie ma czego liczyć (puste zaznaczenie
+    ///   albo zdjęcia bez znanych wymiarów).
     public static func estimate(
         photos: [any SourcePhoto],
         settings: ConversionSettings,
         sampleCount: Int = defaultSampleCount
-    ) async -> Int64? {
-        guard !photos.isEmpty else { return 0 }
+    ) async -> Estimate? {
+        guard !photos.isEmpty else { return Estimate(bytes: 0, isMeasured: true) }
+
+        let totalPixels = photos.reduce(0) { $0 + outputPixelCount(for: $1, settings: settings) }
+        guard totalPixels > 0 else { return nil }
 
         let samples = pickSamples(from: photos, count: sampleCount)
-        guard !samples.isEmpty else { return nil }
 
         let directory = Workspace.rootDirectory.appendingPathComponent("szacunek-\(UUID().uuidString)", isDirectory: true)
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -78,11 +89,34 @@ public struct SizeEstimator: Sendable {
             try? FileManager.default.removeItem(at: outputURL)
         }
 
-        guard sampledPixels > 0, producedBytes > 0 else { return nil }
+        guard sampledPixels > 0, producedBytes > 0 else {
+            // Żadnej próbki nie dało się zmierzyć — na telefonie z włączoną optymalizacją
+            // pamięci to przypadek typowy, nie skrajny: oryginały siedzą w iCloud, a my
+            // świadomie nie ciągniemy ich po sieci tylko po to, żeby narysować tyldę.
+            // Wcześniej funkcja zwracała wtedy `nil`, a etykieta znikała bez słowa —
+            // użytkownik nie miał jak odróżnić „nie wiem" od „zepsute".
+            return Estimate(
+                bytes: Int64(nominalBytesPerPixel(for: settings) * Double(totalPixels)),
+                isMeasured: false
+            )
+        }
 
         let bytesPerPixel = Double(producedBytes) / Double(sampledPixels)
-        let totalPixels = photos.reduce(0) { $0 + outputPixelCount(for: $1, settings: settings) }
-        return Int64(bytesPerPixel * Double(totalPixels))
+        return Estimate(bytes: Int64(bytesPerPixel * Double(totalPixels)), isMeasured: true)
+    }
+
+    /// Zgrubny model „bajtów na piksel", używany gdy nie da się zmierzyć ani jednej próbki.
+    ///
+    /// Wartości dobrane pod typowe zdjęcie z aparatu telefonu: przy jakości 85% JPEG
+    /// wychodzi około 0,29 B/px, co zgadza się z pomiarami na prawdziwych zdjęciach.
+    /// Kwadrat jakości, bo rozmiar JPEG rośnie wolniej niż liniowo wraz z suwakiem.
+    /// PNG jest bezstratny i na szumie matrycy nie ma czego uprościć — stąd rząd
+    /// wielkości wyżej.
+    static func nominalBytesPerPixel(for settings: ConversionSettings) -> Double {
+        switch settings.format {
+        case .jpeg: max(0.02, 0.40 * settings.quality * settings.quality)
+        case .png: 2.0
+        }
     }
 
     /// Wybiera próbki równomiernie po całym zaznaczeniu.

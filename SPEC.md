@@ -198,6 +198,14 @@ gładka ściana zejdzie do 200 kB, liście przy tych samych ustawieniach dadzą 
 Ekstrapolujemy po **liczbie pikseli wyjściowych**, którą znamy dokładnie, a nie po
 rozmiarze plików źródłowych, który mieszałby ze sobą HEIC, JPEG, PNG i RAW.
 
+**Gdy nie ma czego zmierzyć.** Przy włączonej optymalizacji pamięci oryginały starszych
+zdjęć siedzą w iCloud. Świadomie nie ciągniemy ich po sieci tylko po to, żeby narysować
+tyldę — zamiast tego liczba pochodzi wtedy z prostego modelu „bajtów na piksel"
+(zależnego od formatu i jakości), a pod nią pojawia się podpis **„szacunek zgrubny"**.
+Wcześniej etykieta w tej sytuacji znikała bez słowa, przez co nie dało się odróżnić
+„nie wiem" od „zepsute" — i tak właśnie objawiało się to na telefonie, gdzie świeże
+zdjęcia (lokalne) pokazywały rozmiar, a starsze (w chmurze) nie.
+
 Tryb „zmieść w X MB" **nie opiera się na tym szacunku** (§5).
 
 ## 13. Kontrakt przetwarzania

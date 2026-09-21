@@ -9,7 +9,7 @@ import OdbitkaKit
 @Observable
 @MainActor
 final class EstimateModel {
-    private(set) var estimatedBytes: Int64?
+    private(set) var estimate: SizeEstimator.Estimate?
     private(set) var isEstimating = false
 
     private var task: Task<Void, Never>?
@@ -18,7 +18,7 @@ final class EstimateModel {
     func schedule(photos: [any SourcePhoto], settings: ConversionSettings) {
         task?.cancel()
         guard !photos.isEmpty else {
-            estimatedBytes = nil
+            estimate = nil
             return
         }
 
@@ -29,7 +29,7 @@ final class EstimateModel {
             self?.isEstimating = true
             let result = await SizeEstimator.estimate(photos: photos, settings: settings)
             guard !Task.isCancelled else { return }
-            self?.estimatedBytes = result
+            self?.estimate = result
             self?.isEstimating = false
         }
     }
