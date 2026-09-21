@@ -17,21 +17,9 @@ final class PhotoLibraryModel: NSObject, PHPhotoLibraryChangeObserver {
         case denied
     }
 
-    enum Filter: String, CaseIterable, Identifiable {
-        case all
-        case heicOnly
-        var id: String { rawValue }
-    }
-
     private(set) var access: Access = .undetermined
     private(set) var assets: [PHAsset] = []
     private(set) var isLoading = false
-    private(set) var isIndexingFormats = false
-
-    var filter: Filter = .all {
-        didSet { Task { await applyFilter() } }
-    }
-
     private(set) var visibleAssets: [PHAsset] = []
     var selection: Set<String> = [] {
         didSet { scheduleSelectionSizeUpdate() }
@@ -41,7 +29,6 @@ final class PhotoLibraryModel: NSObject, PHPhotoLibraryChangeObserver {
     private(set) var selectionByteCount: Int64 = 0
 
     private var fetchResult: PHFetchResult<PHAsset>?
-    private var formatCache: [String: String] = [:]
     private var selectionSizeTask: Task<Void, Never>?
     private var assetCache: [String: PhotoAsset] = [:]
 
@@ -117,56 +104,11 @@ final class PhotoLibraryModel: NSObject, PHPhotoLibraryChangeObserver {
         collected.reserveCapacity(result.count)
         result.enumerateObjects { asset, _, _ in collected.append(asset) }
         assets = collected
+        visibleAssets = collected
 
-        await applyFilter()
-    }
-
-    private func applyFilter() async {
-        switch filter {
-        case .all:
-            visibleAssets = assets
-        case .heicOnly:
-            await indexFormatsIfNeeded()
-            visibleAssets = assets.filter { asset in
-                guard let uti = formatCache[asset.localIdentifier]?.lowercased() else { return false }
-                return uti.contains("heic") || uti.contains("heif")
-            }
-        }
-        // Zaznaczenie przeżywa zmianę filtra tylko w części, która nadal jest widoczna —
-        // inaczej użytkownik przetworzyłby zdjęcia, których nie widzi na ekranie.
-        let visibleIDs = Set(visibleAssets.map(\.localIdentifier))
-        selection.formIntersection(visibleIDs)
-    }
-
-    /// Ustala format każdego zdjęcia.
-    ///
-    /// `PHAsset` nie wystawia typu pliku wprost — trzeba sięgnąć po jego zasoby, a to
-    /// wywołanie synchroniczne. Przy bibliotece z dziesiątkami tysięcy zdjęć potrafi to
-    /// zająć kilka sekund, dlatego dzieje się raz, w tle, z widocznym wskaźnikiem,
-    /// i zostaje w pamięci na resztę sesji.
-    private func indexFormatsIfNeeded() async {
-        let missing = assets.filter { formatCache[$0.localIdentifier] == nil }
-        guard !missing.isEmpty else { return }
-
-        isIndexingFormats = true
-        defer { isIndexingFormats = false }
-
-        for chunk in missing.chunked(into: 200) {
-            let identifiers = chunk.map(\.localIdentifier)
-            let types = await Task.detached(priority: .userInitiated) { () -> [String: String] in
-                var result: [String: String] = [:]
-                for asset in chunk {
-                    if let uti = PhotoAsset.preferredResource(for: asset)?.uniformTypeIdentifier {
-                        result[asset.localIdentifier] = uti
-                    }
-                }
-                return result
-            }.value
-            for identifier in identifiers {
-                formatCache[identifier] = types[identifier] ?? ""
-            }
-            await Task.yield()
-        }
+        // Zdjęcia mogły zniknąć z biblioteki między jednym wczytaniem a drugim.
+        let availableIDs = Set(collected.map(\.localIdentifier))
+        selection.formIntersection(availableIDs)
     }
 
     // MARK: - Zaznaczenie
@@ -230,15 +172,6 @@ final class PhotoLibraryModel: NSObject, PHPhotoLibraryChangeObserver {
             else { return }
             self.fetchResult = details.fetchResultAfterChanges
             await self.load()
-        }
-    }
-}
-
-extension Array {
-    func chunked(into size: Int) -> [[Element]] {
-        guard size > 0 else { return [self] }
-        return stride(from: 0, to: count, by: size).map {
-            Array(self[$0..<Swift.min($0 + size, count)])
         }
     }
 }

@@ -10,21 +10,15 @@ struct PhotoAsset: SourcePhoto, Identifiable {
     let asset: PHAsset
     let originalFileName: String?
     let byteCount: Int64
-    let uniformTypeIdentifier: String?
 
     var id: String { asset.localIdentifier }
     var creationDate: Date? { asset.creationDate }
     var pixelWidth: Int { asset.pixelWidth }
     var pixelHeight: Int { asset.pixelHeight }
 
-    var isHEIC: Bool {
-        guard let uti = uniformTypeIdentifier?.lowercased() else { return false }
-        return uti.contains("heic") || uti.contains("heif")
-    }
-
     // MARK: - Tworzenie
 
-    /// Odczytuje metadane zasobu (nazwę, rozmiar, typ) bez ruszania samych pikseli.
+    /// Odczytuje metadane zasobu (nazwę i rozmiar) bez ruszania samych pikseli.
     static func make(from asset: PHAsset) -> PhotoAsset {
         let resource = preferredResource(for: asset)
         // `fileSize` nie ma publicznego akcesora, ale jest dostępne przez KVC na
@@ -37,8 +31,7 @@ struct PhotoAsset: SourcePhoto, Identifiable {
         return PhotoAsset(
             asset: asset,
             originalFileName: resource?.originalFilename,
-            byteCount: size,
-            uniformTypeIdentifier: resource?.uniformTypeIdentifier
+            byteCount: size
         )
     }
 

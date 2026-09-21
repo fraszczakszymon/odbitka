@@ -750,40 +750,6 @@
         }
       }
     },
-    "library.empty.heic.message": {
-      "extractionState": "manual",
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Żadne zdjęcie w bibliotece nie jest w formacie HEIC. Wyłącz filtr, żeby zobaczyć pozostałe."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "None of your photos are HEIC. Turn the filter off to see the rest."
-          }
-        }
-      }
-    },
-    "library.empty.heic.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Brak zdjęć HEIC"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No HEIC photos"
-          }
-        }
-      }
-    },
     "library.empty.message": {
       "extractionState": "manual",
       "localizations": {
@@ -814,74 +780,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "No photos"
-          }
-        }
-      }
-    },
-    "library.filter": {
-      "extractionState": "manual",
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Filtr"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Filter"
-          }
-        }
-      }
-    },
-    "library.filter.all": {
-      "extractionState": "manual",
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wszystkie"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "All"
-          }
-        }
-      }
-    },
-    "library.filter.heic": {
-      "extractionState": "manual",
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tylko HEIC"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "HEIC only"
-          }
-        }
-      }
-    },
-    "library.indexing": {
-      "extractionState": "manual",
-      "localizations": {
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sprawdzam formaty zdjęć…"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Checking photo formats…"
           }
         }
       }

@@ -43,29 +43,9 @@ struct LibraryView: View {
 
     @ViewBuilder
     private var content: some View {
-        @Bindable var library = library
-
         VStack(spacing: 0) {
-            Picker(L.s("library.filter"), selection: $library.filter) {
-                Text(L.s("library.filter.all")).tag(PhotoLibraryModel.Filter.all)
-                Text(L.s("library.filter.heic")).tag(PhotoLibraryModel.Filter.heicOnly)
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal)
-            .padding(.vertical, 8)
-
             if library.access == .limited {
                 LimitedAccessBar()
-            }
-
-            if library.isIndexingFormats {
-                HStack(spacing: 8) {
-                    ProgressView()
-                    Text(L.s("library.indexing"))
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.bottom, 8)
             }
 
             if library.isLoading {
@@ -73,7 +53,7 @@ struct LibraryView: View {
                 ProgressView()
                 Spacer()
             } else if library.visibleAssets.isEmpty {
-                EmptyLibraryView(filter: library.filter)
+                EmptyLibraryView()
             } else {
                 grid
             }
@@ -194,16 +174,11 @@ private struct LimitedAccessBar: View {
 }
 
 private struct EmptyLibraryView: View {
-    let filter: PhotoLibraryModel.Filter
-
     var body: some View {
         ContentUnavailableView {
-            Label(
-                filter == .heicOnly ? L.s("library.empty.heic.title") : L.s("library.empty.title"),
-                systemImage: "photo.on.rectangle.angled"
-            )
+            Label(L.s("library.empty.title"), systemImage: "photo.on.rectangle.angled")
         } description: {
-            Text(filter == .heicOnly ? L.s("library.empty.heic.message") : L.s("library.empty.message"))
+            Text(L.s("library.empty.message"))
         }
     }
 }

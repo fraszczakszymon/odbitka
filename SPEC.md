@@ -28,7 +28,7 @@ Interfejs po polsku i angielsku. Bundle ID: `pl.froncek.odbitka`.
 ## 2. Przepływ
 
 ```
-1. Galeria          siatka biblioteki, filtr „tylko HEIC", zaznaczanie wielokrotne
+1. Galeria          siatka biblioteki, zaznaczanie wielokrotne
                     pasek u dołu: „47 zdjęć · 182 MB"                      [Dalej]
 2. Ustawienia       wszystkie opcje naraz, wartości z ostatniego użycia
                     szacunek „~14 MB"                                  [Przetwórz]
@@ -47,8 +47,6 @@ przy pierwszym uruchomieniu (§11).
 - **Wideo nie pojawia się w ogóle.** Aplikacja konwertuje zdjęcia; pokazanie filmu,
   którego nie umie przetworzyć, rodziłoby tylko pytanie „czemu się nie zmniejszył".
 - **Live Photo** → sama klatka, część filmowa odrzucana.
-- **Filtr „tylko HEIC"** jednym tapnięciem. `PHAsset` nie wystawia typu pliku wprost,
-  więc formaty są indeksowane raz, w tle, z widocznym wskaźnikiem, i cache'owane na sesję.
 - Bierzemy **wersję edytowaną** (zasób `fullSizePhoto`), a nie oryginał sprzed edycji —
   kto wyprostował horyzont, oczekuje wyprostowanego zdjęcia w paczce.
 
@@ -295,6 +293,11 @@ TestFlight, docelowo App Store. Darmowa, bez reklam, bez zakupów w aplikacji, b
 - **WebP i AVIF** — `ImageIO` na iOS nie daje pewnego enkodera, a odbiorcy (Windows,
   starsze Androidy, Outlook) mają z nimi ten sam problem, który aplikacja ma leczyć.
 - **Wideo** — inna ścieżka eksportu, inne nazewnictwo, brak zmniejszania.
+- **Filtr „tylko HEIC"** w galerii — `PHAsset` nie wystawia typu pliku wprost, więc
+  wymagałby zsynchronizowanego przejścia po zasobach całej biblioteki (kilka sekund przy
+  dziesiątkach tysięcy zdjęć) po to, żeby ukryć część kafelków. Konwersja JPEG → JPEG też
+  ma sens (zmniejszanie, nazwy, metadane), więc filtr ukrywałby zdjęcia, które użytkownik
+  może chcieć przetworzyć.
 - **Projekty i zlecenia** (nazwa klienta, sesje po dacie, historia wysyłek) — wymagałyby
   trwałej bazy i migracji. Prefiks nazwy pokrywa większość tej potrzeby.
 - **Presety** — wycięte świadomie na rzecz „wszystko widoczne, wartości z ostatniego użycia".
