@@ -31,7 +31,15 @@ struct SettingsView: View {
         .navigationDestination(item: $request) { request in
             ProcessingScreen(request: request)
         }
-        .onAppear { refreshEstimate() }
+        .onAppear {
+            // Ustawienie zapisane wcześniej może nie trafiać w żaden próg — wtedy picker
+            // pokazuje „Własna" i pole musi znać swoją wartość, zamiast świecić pustką
+            // obok ustawienia, które realnie obowiązuje.
+            if let pixels = settings.targetSize.pixels, !TargetSize.presetValues.contains(pixels) {
+                customLongEdge = String(pixels)
+            }
+            refreshEstimate()
+        }
         .onChange(of: settings) { _, _ in refreshEstimate() }
         .onDisappear { estimate.cancel() }
     }
@@ -62,8 +70,8 @@ struct SettingsView: View {
 
         return Section {
             Picker(L.s("settings.longEdge"), selection: longEdgeBinding) {
-                ForEach(TargetSize.presetValues, id: \.self) { value in
-                    Text("\(value) px").tag(LongEdgeChoice.preset(value))
+                ForEach(TargetSize.presets) { preset in
+                    Text(preset.label).tag(LongEdgeChoice.preset(preset.pixels))
                 }
                 Text(L.s("settings.longEdge.original")).tag(LongEdgeChoice.original)
                 Text(L.s("settings.longEdge.custom")).tag(LongEdgeChoice.custom)

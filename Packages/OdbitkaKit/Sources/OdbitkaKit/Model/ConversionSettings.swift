@@ -12,8 +12,44 @@ public enum TargetSize: Sendable, Codable, Equatable {
         }
     }
 
-    /// Wartości pokazywane na ekranie ustawień jako gotowe do wyboru.
-    public static let presetValues = [1280, 1600, 2048, 2560]
+    /// Gotowy próg rozdzielczości pokazywany na ekranie ustawień.
+    public struct Preset: Sendable, Hashable, Identifiable {
+        public let pixels: Int
+        /// Potoczna nazwa progu, o ile jakaś istnieje i jest prawdziwa.
+        public let name: String?
+
+        public var id: Int { pixels }
+
+        /// „Full HD (1920 px)" albo samo „1600 px", gdy nazwy nie ma.
+        public var label: String {
+            guard let name else { return "\(pixels) px" }
+            return "\(name) (\(pixels) px)"
+        }
+    }
+
+    /// Progi do wyboru na ekranie ustawień.
+    ///
+    /// Wartości są **kanoniczne**, żeby nazwy nie kłamały. Każda odpowiada długiemu
+    /// bokowi znanego formatu obrazu:
+    /// 640 = 480p, 1280 = 720p, 1920 = 1080p, 2560 = 1440p, 3840 = 2160p (UHD).
+    ///
+    /// Świadomie nie ma tu „2K": w kinie oznacza 2048 px, w sprzedaży monitorów 2560 px,
+    /// więc obok „4K" byłoby myląco niejednoznaczne. 1440p nazywamy QHD, bo to nazwa,
+    /// która ma jedno znaczenie.
+    public static let presets: [Preset] = [
+        Preset(pixels: 640, name: "SD"),
+        Preset(pixels: 1280, name: "HD"),
+        Preset(pixels: 1920, name: "Full HD"),
+        Preset(pixels: 2560, name: "QHD"),
+        Preset(pixels: 3840, name: "4K")
+    ]
+
+    public static var presetValues: [Int] { presets.map(\.pixels) }
+
+    /// Etykieta dowolnej wartości — nazwana, jeśli trafia w próg, inaczej same piksele.
+    public static func label(forLongEdge pixels: Int) -> String {
+        presets.first { $0.pixels == pixels }?.label ?? "\(pixels) px"
+    }
 }
 
 /// Limit wielkości nałożony na cały wynik.
@@ -61,7 +97,7 @@ public struct ConversionSettings: Sendable, Codable, Equatable {
 
     public init(
         format: ImageFormat = .jpeg,
-        targetSize: TargetSize = .longEdge(1600),
+        targetSize: TargetSize = .longEdge(1920),
         quality: Double = 0.85,
         budget: SizeBudget = SizeBudget(),
         convertToSRGB: Bool = true,

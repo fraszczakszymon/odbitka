@@ -70,7 +70,7 @@ struct ShareRootView: View {
                     get: { store.settings.targetSize.pixels ?? 0 },
                     set: { store.settings.targetSize = $0 == 0 ? .original : .longEdge($0) }
                 )) {
-                    ForEach(TargetSize.presetValues, id: \.self) { Text("\($0) px").tag($0) }
+                    ForEach(TargetSize.presets) { Text($0.label).tag($0.pixels) }
                     Text(L.s("settings.longEdge.original")).tag(0)
                 }
                 if store.settings.format.supportsQuality {

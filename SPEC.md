@@ -64,9 +64,17 @@ PNG jest bezstratny, więc zdjęcie z aparatu potrafi w nim zająć kilka razy w
 
 ## 5. Rozmiar — trzy niezależne pokrętła
 
-**Dłuższy bok**: 1280 / 1600 / 2048 / 2560 / Oryginał / Własna.
-Nigdy nie powiększamy: wybranie 2560 px dla zdjęcia o boku 1200 px nie doda pikseli,
-których nie ma.
+**Dłuższy bok**: SD (640 px) / HD (1280 px) / Full HD (1920 px) / QHD (2560 px) /
+4K (3840 px) / Oryginał / Własna.
+
+Wartości progów są **kanoniczne**, żeby nazwy nie kłamały — każda to długi bok znanego
+formatu obrazu (480p, 720p, 1080p, 1440p, 2160p). Świadomie nie ma wśród nich „2K":
+w kinie oznacza 2048 px, w sprzedaży monitorów 2560 px, więc obok „4K" byłoby myląco
+niejednoznaczne. Wartość spoza progów (pole „Własna") wyświetla się jako same piksele.
+
+**Skalowanie działa wyłącznie w dół.** Wybranie 3840 px dla zdjęcia o boku 1200 px nie
+doda pikseli, których nie ma — żądanie jest przycinane do rzeczywistego rozmiaru źródła
+(`min(requested, sourceLongEdge)`), tak w konwerterze, jak i w szacunku rozmiaru.
 
 **Jakość**: 30–100%, wyłącznie dla JPEG (PNG jest bezstratny — suwak znika).
 

@@ -90,7 +90,7 @@ struct ResultView: View {
     /// o zmieszczenie się w limicie.
     private var budgetNote: String? {
         guard result.budgetPasses > 1 else { return nil }
-        let size = result.effectiveSettings.targetSize.pixels.map { "\($0) px" }
+        let size = result.effectiveSettings.targetSize.pixels.map(TargetSize.label(forLongEdge:))
             ?? L.s("settings.longEdge.original")
         return L.f("result.budgetAdjusted", size, Int(result.effectiveSettings.quality * 100))
     }
