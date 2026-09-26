@@ -92,6 +92,24 @@ else
     "rodzina $FAMILY obejmuje iPada, więc potrzeba UISupportedInterfaceOrientations~ipad z czterema orientacjami (błąd 90474)"
 fi
 
+# Grupa aplikacji z uprawnień musi zgadzać się z tą, o którą prosi kod. Niezgodność
+# jest niewidoczna dla kompilatora i objawia się dopiero na urządzeniu: containerURL
+# zwraca nil, przekazywanie zdjęć z rozszerzenia przestaje działać, a ustawienia
+# cichutko rozjeżdżają się między aplikacją a rozszerzeniem.
+CODE_GROUP=$(grep -E 'appGroupID *= *"' Packages/PixportKit/Sources/PixportKit/Handoff/Handoff.swift | sed -E 's/.*"(.*)".*/\1/')
+# PlistBuddy, nie plutil: plutil traktuje kropki jako separator ścieżki, a sam klucz
+# „com.apple.security.application-groups" jest ich pełen.
+read_group() {
+  /usr/libexec/PlistBuddy -c "Print :com.apple.security.application-groups:0" "$1" 2>/dev/null || echo ""
+}
+APP_GROUP=$(read_group Pixport/Pixport.entitlements)
+EXT_GROUP=$(read_group PixportShare/PixportShare.entitlements)
+if [ -n "$CODE_GROUP" ] && [ "$CODE_GROUP" = "$APP_GROUP" ] && [ "$CODE_GROUP" = "$EXT_GROUP" ]; then
+  check ok "grupa aplikacji spójna z kodem ($CODE_GROUP)"
+else
+  check bad "grupa aplikacji spójna z kodem" "kod: $CODE_GROUP, aplikacja: $APP_GROUP, rozszerzenie: $EXT_GROUP"
+fi
+
 # Wersja i numer builda rozszerzenia muszą zgadzać się z aplikacją — rozjazd odbija paczkę.
 app_ver=$(plutil -extract CFBundleShortVersionString raw "$INFO_PLIST")
 ext_ver=$(plutil -extract CFBundleShortVersionString raw PixportShare/Info.plist)
