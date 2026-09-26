@@ -21,6 +21,7 @@ The Xcode project is **generated**, not checked in as the source of truth.
 xcodegen generate                              # regenerate Pixport.xcodeproj from project.yml
 swift test --package-path Packages/PixportKit  # engine tests, run on macOS — no simulator needed
 swift Tools/make-icon.swift Pixport/Assets.xcassets/AppIcon.appiconset/AppIcon.png
+swift Tools/make-icon.swift docs/icon.png --rounded --size 512   # README variant (has alpha)
 
 xcodebuild -project Pixport.xcodeproj -scheme Pixport \
   -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
