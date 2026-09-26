@@ -77,7 +77,7 @@ else
 fi
 
 # Deklaracja eksportowa. Bez niej App Store Connect pyta o zgodność przy KAŻDYM buildzie.
-if plutil -extract ITSAppUsesNonExemptEncryption raw "$INFO_PLIST" >/dev/null 2>&1; then
+if /usr/libexec/PlistBuddy -c "Print :ITSAppUsesNonExemptEncryption" "$INFO_PLIST" >/dev/null 2>&1; then
   check ok "zadeklarowana zgodność eksportowa"
 else
   check bad "zadeklarowana zgodność eksportowa" "dodaj ITSAppUsesNonExemptEncryption do $INFO_PLIST"
@@ -167,6 +167,52 @@ xcodebuild -exportArchive \
 
 IPA=$(find "$OUT" -name "*.ipa" | head -1)
 [ -n "$IPA" ] || { echo "nie powstała paczka .ipa"; exit 1; }
+
+# ------------------------------------------------------- weryfikacja gotowej paczki
+#
+# Uprawnienia, o które prosi podpisana aplikacja, muszą mieścić się w tym, co dopuszcza
+# dołączony profil. Rozjazd jest niewidoczny na etapie budowania — xcodebuild eksportuje
+# taką paczkę bez słowa — a wychodzi dopiero przy walidacji w App Store albo, gorzej,
+# jako funkcja nieczynna na urządzeniu. Zdarza się po zmianie identyfikatora grupy
+# aplikacji, gdy Xcode sięgnie po profil z cache'u zamiast wystawić nowy.
+echo "→ weryfikacja paczki"
+VERIFY=$(mktemp -d)
+trap 'rm -rf "$VERIFY"' EXIT
+unzip -q "$IPA" -d "$VERIFY"
+VAPP=$(find "$VERIFY/Payload" -maxdepth 1 -name "*.app" | head -1)
+
+codesign -d --entitlements - --xml "$VAPP" > "$VERIFY/app.entitlements" 2>/dev/null
+security cms -D -i "$VAPP/embedded.mobileprovision" > "$VERIFY/profile.plist" 2>/dev/null
+
+# PlistBuddy, bo klucz „com.apple.security.application-groups" jest pełen kropek,
+# a plutil traktuje je jako separator ścieżki.
+read_array() {
+  local i=0 value
+  while value=$(/usr/libexec/PlistBuddy -c "Print :$2:$i" "$1" 2>/dev/null); do
+    printf '%s\n' "$value"; i=$((i + 1))
+  done
+}
+
+want=$(read_array "$VERIFY/app.entitlements" "com.apple.security.application-groups")
+have=$(read_array "$VERIFY/profile.plist" "Entitlements:com.apple.security.application-groups")
+
+# Warunkiem jest ZAWIERANIE, nie równość: profil zwykle autoryzuje więcej, niż
+# aplikacja wykorzystuje — na przykład grupy z poprzednich nazw projektu, które
+# zostały przypisane do App ID i nikomu nie przeszkadzają.
+missing=""
+for group in $want; do
+  echo "$have" | grep -qx "$group" || missing="$missing $group"
+done
+
+if [ -z "$missing" ]; then
+  echo "   ✓ grupy aplikacji autoryzowane przez profil ($(echo $want))"
+else
+  echo "   ✗ profil nie autoryzuje:$missing"
+  echo "     profil dopuszcza: $(echo $have)"
+  echo "     Xcode mógł użyć profilu z cache'u. Odśwież je i zbuduj ponownie:"
+  echo "       ./Tools/clean-profiles.sh && ./Tools/release.sh"
+  exit 1
+fi
 
 echo "→ gotowe: $IPA ($(du -h "$IPA" | cut -f1))"
 
