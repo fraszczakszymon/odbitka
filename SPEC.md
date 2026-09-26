@@ -1,14 +1,16 @@
-# Odbitka — specyfikacja aplikacji
+# Pixport — specyfikacja aplikacji
 
 > Aplikacja na iPhone'a, która przygotowuje zdjęcia do wysłania: zamienia HEIC na JPG
 > lub PNG, zmniejsza je, czyści metadane, nadaje wspólną nazwę z numeracją i pakuje.
 > Wszystko dzieje się na urządzeniu — aplikacja nie ma serwera i nie wysyła nigdzie
 > Twoich zdjęć.
 
-Nazwa niesie całą ideę: **robisz odbitkę, żeby komuś dać — oryginał zostaje u Ciebie.**
+Nazwa składa się z dwóch pracujących części: **pix** to zdjęcia, a **port** znaczy
+równocześnie „przenieść na inny format" (portowanie) i „port, z którego się wypływa".
+Konwersja i wysyłka w jednym słowie — dokładnie to, co aplikacja robi.
 Biblioteka zdjęć nigdy nie jest modyfikowana.
 
-Interfejs po polsku i angielsku. Bundle ID: `pl.froncek.odbitka`.
+Interfejs po polsku i angielsku. Bundle ID: `pl.froncek.pixport`.
 
 ---
 
@@ -19,9 +21,9 @@ Interfejs po polsku i angielsku. Bundle ID: `pl.froncek.odbitka`.
 - Obrazy: **ImageIO** i **Core Graphics**. Biblioteka zdjęć: **PhotoKit**.
 - **Zero zależności zewnętrznych.** Zapis ZIP jest własny (patrz §9).
 - Trzy cele kompilacji:
-  - `Odbitka` — aplikacja,
-  - `OdbitkaShare` — rozszerzenie udostępniania,
-  - `Packages/OdbitkaKit` — lokalny pakiet SPM z całym silnikiem i testami.
+  - `Pixport` — aplikacja,
+  - `PixportShare` — rozszerzenie udostępniania,
+  - `Packages/PixportKit` — lokalny pakiet SPM z całym silnikiem i testami.
 - Projekt Xcode generowany przez **XcodeGen** z `project.yml` (plik `.xcodeproj`
   jest artefaktem, nie źródłem).
 
@@ -51,7 +53,7 @@ przy pierwszym uruchomieniu (§11).
   kto wyprostował horyzont, oczekuje wyprostowanego zdjęcia w paczce.
 
 **Zdjęcia w iCloud.** Przy włączonej optymalizacji pamięci oryginały nie leżą na
-urządzeniu. Odbitka je **pobiera** (`isNetworkAccessAllowed = true`) i to jest **jedyne
+urządzeniu. Pixport je **pobiera** (`isNetworkAccessAllowed = true`) i to jest **jedyne
 miejsce w całej aplikacji, które dotyka sieci**. Obietnica „wszystko lokalnie" pozostaje
 prawdziwa: nic nie wychodzi na zewnątrz, zdjęcia wracają z konta użytkownika.
 
@@ -241,7 +243,7 @@ Nie obiecujemy przetwarzania w tle; ekran nie gaśnie w trakcie pracy.
 
 ## 14. Pliki robocze
 
-Wszystko w `tmp/Odbitka/<sesja>/`, nie w `Documents/`: system może to posprzątać sam przy
+Wszystko w `tmp/Pixport/<sesja>/`, nie w `Documents/`: system może to posprzątać sam przy
 niedoborze miejsca, a przetworzone duplikaty nie zżerają kopii zapasowej iCloud.
 
 Pliki żyją do końca sesji — tyle, żeby dało się wrócić na ekran wyniku, dokończyć wysyłkę
@@ -251,12 +253,12 @@ miejscem.
 
 ## 15. Rozszerzenie udostępniania
 
-Zdjęcia → Udostępnij → Odbitka.
+Zdjęcia → Udostępnij → Pixport.
 
 - **Do 20 zdjęć** rozszerzenie robi wszystko na miejscu: ustawienia, przetwarzanie
   szeregowe, arkusz udostępniania. Użytkownik nie opuszcza Zdjęć.
-- **Powyżej progu** kopiuje pliki do kontenera App Group (`group.pl.froncek.odbitka`),
-  zapisuje manifest i otwiera aplikację przez `odbitka://handoff?session=…`.
+- **Powyżej progu** kopiuje pliki do kontenera App Group (`group.pl.froncek.pixport`),
+  zapisuje manifest i otwiera aplikację przez `pixport://handoff?session=…`.
 
 Powód podziału: rozszerzenia dostają rzędu 120 MB pamięci wobec ponad 1 GB dla
 aplikacji. Ubite rozszerzenie wygląda dla użytkownika jak zniknięcie okienka bez słowa.

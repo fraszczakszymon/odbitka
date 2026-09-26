@@ -2,7 +2,7 @@
 
 ## What is this?
 
-**Odbitka** — iPhone app that prepares photos for sending: HEIC → JPG/PNG, downscale,
+**Pixport** — iPhone app that prepares photos for sending: HEIC → JPG/PNG, downscale,
 strip metadata, batch-rename with a shared prefix, pack into ZIP, hand off to the share
 sheet. Everything runs on-device; there is no server and nothing is uploaded. Polish and
 English UI. Product spec in `SPEC.md` (Polish).
@@ -18,11 +18,11 @@ The Xcode project is **generated**, not checked in as the source of truth.
 ## Commands
 
 ```bash
-xcodegen generate                              # regenerate Odbitka.xcodeproj from project.yml
-swift test --package-path Packages/OdbitkaKit  # engine tests, run on macOS — no simulator needed
-swift Tools/make-icon.swift Odbitka/Assets.xcassets/AppIcon.appiconset/AppIcon.png
+xcodegen generate                              # regenerate Pixport.xcodeproj from project.yml
+swift test --package-path Packages/PixportKit  # engine tests, run on macOS — no simulator needed
+swift Tools/make-icon.swift Pixport/Assets.xcassets/AppIcon.appiconset/AppIcon.png
 
-xcodebuild -project Odbitka.xcodeproj -scheme Odbitka \
+xcodebuild -project Pixport.xcodeproj -scheme Pixport \
   -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
   -configuration Debug CODE_SIGNING_ALLOWED=NO build
 ```
@@ -33,7 +33,7 @@ or build settings through the Xcode UI, they will be overwritten.
 ## Architecture
 
 ```
-Packages/OdbitkaKit/          local SPM package — the whole engine, zero UIKit/PhotoKit
+Packages/PixportKit/          local SPM package — the whole engine, zero UIKit/PhotoKit
   Model/                      ConversionSettings, MetadataPolicy, SourcePhoto, errors
   Naming/FileNamer            normalisation, ordering, numbering, dedup   (pure)
   Imaging/ImageConverter      the single ImageIO path: decode → scale → encode
@@ -47,12 +47,12 @@ Packages/OdbitkaKit/          local SPM package — the whole engine, zero UIKit
   Pipeline/Workspace          tmp/ session dirs, cleanup, free space
   Handoff/                    App Group transfer between extension and app
 
-Odbitka/                      app target — thin SwiftUI layer
+Pixport/                      app target — thin SwiftUI layer
   Photos/PhotoAsset           the ONLY PHAsset ↔ SourcePhoto adapter
   Features/{Welcome,Library,Settings,Processing,Result,AppSettings}
   Shared/                     Localization, ErrorPresentation, ShareSheet, NetworkMonitor
 
-OdbitkaShare/                 share extension — its own self-contained SwiftUI screen
+PixportShare/                 share extension — its own self-contained SwiftUI screen
 ```
 
 ## Key conventions
@@ -85,10 +85,10 @@ OdbitkaShare/                 share extension — its own self-contained SwiftUI
 
 ## Gotchas
 
-- **`Odbitka.xcodeproj` is generated.** Changes made in Xcode's project editor vanish on
+- **`Pixport.xcodeproj` is generated.** Changes made in Xcode's project editor vanish on
   the next `xcodegen generate`. Edit `project.yml`.
 - **The extension cannot use `UIApplication.shared`.** `project.yml` lists its sources
-  file by file for that reason — do not point it at `Odbitka/` wholesale. Its UI is
+  file by file for that reason — do not point it at `Pixport/` wholesale. Its UI is
   deliberately duplicated rather than shared.
 - **`Info.plist` must carry `CFBundleIdentifier`, `CFBundleVersion` and friends**
   explicitly (as `$(...)` variables). With a custom `INFOPLIST_FILE` Xcode does not

@@ -7,7 +7,7 @@ xcuserdata/
 .build/
 
 # Projekt Xcode jest generowany z project.yml przez XcodeGen — patrz AGENTS.md
-Odbitka.xcodeproj/
+Pixport.xcodeproj/
 
 # macOS
 .DS_Store

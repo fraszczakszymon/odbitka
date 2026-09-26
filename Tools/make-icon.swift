@@ -1,11 +1,11 @@
 // Generator ikony aplikacji. Uruchamiany ręcznie:
-//     swift Tools/make-icon.swift Odbitka/Assets.xcassets/AppIcon.appiconset/AppIcon.png
+//     swift Tools/make-icon.swift Pixport/Assets.xcassets/AppIcon.appiconset/AppIcon.png
 //
 // Ikona powstaje kodem, a nie w edytorze graficznym, żeby dała się odtworzyć
 // i poprawić razem z resztą projektu — bez szukania pliku źródłowego w cudzym katalogu.
 //
-// Motyw: dwie odbitki wysunięte z pliku, jedna na drugiej. Dokładnie to, co robi
-// aplikacja: z jednego zdjęcia robi kopię do oddania.
+// Motyw: dwa zdjęcia wysunięte jedno spod drugiego, gotowe do drogi. Dokładnie to,
+// co robi aplikacja: z oryginałów robi kopie do wysłania, nie ruszając pierwowzorów.
 
 import AppKit
 import CoreGraphics
@@ -40,7 +40,7 @@ context.drawLinearGradient(
     options: []
 )
 
-/// Rysuje pojedynczą odbitkę: biała ramka z obrazem w środku.
+/// Rysuje pojedyncze zdjęcie: biała ramka z obrazem w środku.
 func drawPrint(center: CGPoint, size: CGSize, rotation: CGFloat, photo: [CGColor], shadow: Bool) {
     context.saveGState()
     context.translateBy(x: center.x, y: center.y)
@@ -80,7 +80,7 @@ func drawPrint(center: CGPoint, size: CGSize, rotation: CGFloat, photo: [CGColor
     context.restoreGState()
 }
 
-// Odbitka spodnia — przygaszona, lekko odchylona: sygnał, że pracujemy na paczkach.
+// Pixport spodnia — przygaszona, lekko odchylona: sygnał, że pracujemy na paczkach.
 drawPrint(
     center: CGPoint(x: side / 2 - 60, y: side / 2 - 30),
     size: CGSize(width: 430, height: 500),
@@ -89,7 +89,7 @@ drawPrint(
     shadow: true
 )
 
-// Odbitka wierzchnia — pełna barwa.
+// Pixport wierzchnia — pełna barwa.
 drawPrint(
     center: CGPoint(x: side / 2 + 55, y: side / 2 + 20),
     size: CGSize(width: 430, height: 500),

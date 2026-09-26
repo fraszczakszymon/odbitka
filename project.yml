@@ -1,4 +1,4 @@
-name: Odbitka
+name: Pixport
 options:
   bundleIdPrefix: pl.froncek
   deploymentTarget:
@@ -17,48 +17,48 @@ settings:
     SWIFT_STRICT_CONCURRENCY: complete
 
 packages:
-  OdbitkaKit:
-    path: Packages/OdbitkaKit
+  PixportKit:
+    path: Packages/PixportKit
 
 targets:
-  Odbitka:
+  Pixport:
     type: application
     platform: iOS
     sources:
-      - path: Odbitka
+      - path: Pixport
     dependencies:
-      - package: OdbitkaKit
-      - target: OdbitkaShare
+      - package: PixportKit
+      - target: PixportShare
         embed: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: pl.froncek.odbitka
-        INFOPLIST_FILE: Odbitka/Info.plist
-        CODE_SIGN_ENTITLEMENTS: Odbitka/Odbitka.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: pl.froncek.pixport
+        INFOPLIST_FILE: Pixport/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Pixport/Pixport.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         TARGETED_DEVICE_FAMILY: "1,2"
         # Polski jest językiem źródłowym projektu; angielski to pełnoprawne tłumaczenie.
         SWIFT_EMIT_LOC_STRINGS: YES
 
-  OdbitkaShare:
+  PixportShare:
     type: app-extension
     platform: iOS
     sources:
-      - path: OdbitkaShare
+      - path: PixportShare
       # Rozszerzenie dostaje tylko te pliki aplikacji, które nie sięgają po
       # UIApplication.shared ani po bibliotekę zdjęć — jedno jest w rozszerzeniach
       # niedostępne, drugie zbędne.
-      - path: Odbitka/Shared/Localization.swift
-      - path: Odbitka/Shared/ErrorPresentation.swift
-      - path: Odbitka/Shared/ShareSheet.swift
-      - path: Odbitka/Features/Settings/SettingsStore.swift
-      - path: Odbitka/Resources/Localizable.xcstrings
+      - path: Pixport/Shared/Localization.swift
+      - path: Pixport/Shared/ErrorPresentation.swift
+      - path: Pixport/Shared/ShareSheet.swift
+      - path: Pixport/Features/Settings/SettingsStore.swift
+      - path: Pixport/Resources/Localizable.xcstrings
     dependencies:
-      - package: OdbitkaKit
+      - package: PixportKit
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: pl.froncek.odbitka.share
-        INFOPLIST_FILE: OdbitkaShare/Info.plist
-        CODE_SIGN_ENTITLEMENTS: OdbitkaShare/OdbitkaShare.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: pl.froncek.pixport.share
+        INFOPLIST_FILE: PixportShare/Info.plist
+        CODE_SIGN_ENTITLEMENTS: PixportShare/PixportShare.entitlements
         TARGETED_DEVICE_FAMILY: "1,2"
