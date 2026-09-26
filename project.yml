@@ -9,7 +9,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    DEVELOPMENT_TEAM: FL9F23BAR9
+    DEVELOPMENT_TEAM: "FL9F23BAR9"
     CODE_SIGN_STYLE: Automatic
     MARKETING_VERSION: "1.0"
     CURRENT_PROJECT_VERSION: "1"
@@ -37,7 +37,12 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Pixport/Pixport.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
-        TARGETED_DEVICE_FAMILY: "1,2"
+        # Tylko iPhone. Interfejs nie był projektowany pod iPada — na dużym ekranie
+        # rozciąga się bez sensu, a teksty mówią wprost "on your phone". Deklaracja
+        # rodziny "1,2" wymagałaby też wszystkich czterech orientacji (walidacja 90474).
+        # Kierunek jest odwracalny w jedną stronę: iPada da się DODAĆ w aktualizacji,
+        # ale nie da się go ZABRAĆ, nie odbierając aplikacji tym, którzy ją mają.
+        TARGETED_DEVICE_FAMILY: "1"
         # Polski jest językiem źródłowym projektu; angielski to pełnoprawne tłumaczenie.
         SWIFT_EMIT_LOC_STRINGS: YES
 
@@ -61,4 +66,4 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: pl.froncek.pixport.share
         INFOPLIST_FILE: PixportShare/Info.plist
         CODE_SIGN_ENTITLEMENTS: PixportShare/PixportShare.entitlements
-        TARGETED_DEVICE_FAMILY: "1,2"
+        TARGETED_DEVICE_FAMILY: "1"

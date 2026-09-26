@@ -28,6 +28,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- Aplikacja nie zawiera własnej kryptografii ani nie używa szyfrowania poza
+	     tym, co daje system. Bez tego klucza App Store Connect pyta o zgodność
+	     eksportową przy KAŻDYM wysłanym buildzie. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

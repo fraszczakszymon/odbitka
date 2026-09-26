@@ -83,6 +83,71 @@ PixportShare/                 share extension — its own self-contained SwiftUI
   (lossless) about downscaling, and never call ZIP "kompresja" — it compresses JPEGs by
   roughly nothing.
 
+## Releasing to TestFlight
+
+```bash
+./Tools/release.sh --check-only   # preflight only — touches nothing
+./Tools/release.sh                # archive + export → build/Pixport-<version>-<build>/*.ipa
+./Tools/release.sh --upload       # …and send to App Store Connect
+```
+
+**Build number is the commit count** (`git rev-list --count HEAD`). It always grows,
+never repeats, and identifies the exact source state. App Store Connect rejects a
+repeated build number, and bumping it by hand is forgotten sooner or later.
+
+`release.sh` runs a preflight before it builds anything. Each check corresponds to a
+real validation error Apple bounces packages with — finding out from Apple costs a full
+archive, export, upload and wait:
+
+| Check | Error it prevents |
+|---|---|
+| App icon has no alpha channel | **90717** large app icon can't contain an alpha channel |
+| `ITSAppUsesNonExemptEncryption` present | App Store Connect asks about export compliance on *every* build |
+| Device family matches declared orientations | **90474** include all orientations to support iPad multitasking |
+| Extension version/build match the app | mismatched versions bounce the package |
+
+The checks are verified to fail, not just to pass — break one deliberately and
+`--check-only` exits non-zero with a fix instruction.
+
+### Gotchas that cost time elsewhere
+
+- **`-allowProvisioningUpdates` is needed for the archive AND the export.** Without it
+  on the export step, the archive succeeds and then the export dies with "No profiles
+  for `pl.froncek.pixport` were found" — the distribution profile is only created at
+  export time. The flag is not passive: it uses the Xcode Apple ID session and creates
+  distribution certificates and profiles on the account.
+- **The app is iPhone-only** (`TARGETED_DEVICE_FAMILY: "1"`). Deliberate: the UI was
+  never designed for iPad, and the direction is only reversible one way — iPad can be
+  *added* in an update, but never *removed* without taking the app away from people who
+  already have it. If you widen it, you must also add
+  `UISupportedInterfaceOrientations~ipad` with all four orientations.
+- **The icon is generated** by `Tools/make-icon.swift`, which hard-fails if the result
+  would carry an alpha channel. Do not hand-edit the PNG.
+- **`LSApplicationCategoryType` is macOS-only.** The iOS app category is chosen in App
+  Store Connect, not in `Info.plist`.
+
+### What must exist before the first upload
+
+- **An app record in App Store Connect** — My Apps → + → New App, platform iOS, bundle
+  id `pl.froncek.pixport`, a name that is unique across the entire App Store.
+- **An App Store Connect API key** for terminal uploads — Users and Access →
+  Integrations → App Store Connect API (a fresh account must click "Request Access"
+  first; the App Manager role is enough). `AuthKey_*.p8` downloads **once**; put it in
+  `~/.appstoreconnect/private_keys/` and export `ASC_KEY_ID` and `ASC_ISSUER_ID`.
+  Without a key, Apple's Transporter app takes the `.ipa` by drag and drop.
+- **The trader / non-trader declaration (DSA)** in the Business tab. Without it Apple
+  blocks distribution in the EU. A private app is non-trader.
+
+### TestFlight facts worth knowing before promising anything
+
+- **Internal testers must be App Store Connect users** — an arbitrary email address
+  cannot be added. The weakest role that can test is Marketer.
+- **External testers** can be any address, but the first build of each version goes
+  through Beta App Review and needs Test Information filled in.
+- **"Enable automatic distribution" cannot be changed later** for a group. Leave it off
+  and add builds by hand in the Builds tab once processing finishes.
+- **A build expires after 90 days.**
+
 ## Gotchas
 
 - **`Pixport.xcodeproj` is generated.** Changes made in Xcode's project editor vanish on

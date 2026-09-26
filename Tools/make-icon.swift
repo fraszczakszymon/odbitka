@@ -19,7 +19,10 @@ let outputPath = CommandLine.arguments.count > 1
 guard let space = CGColorSpace(name: CGColorSpace.sRGB),
       let context = CGContext(
           data: nil, width: side, height: side, bitsPerComponent: 8, bytesPerRow: 0,
-          space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+          // Bez kanału alfa. App Store odrzuca ikony z przezroczystością błędem 90717,
+          // a Core Graphics na macOS nie zna kontekstu 24-bitowego — `noneSkipLast`
+          // daje cztery bajty na piksel z ostatnim ignorowanym, czyli obraz nieprzezroczysty.
+          space: space, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue
       )
 else { fatalError("Nie udało się utworzyć kontekstu rysowania") }
 
@@ -99,9 +102,22 @@ drawPrint(
 )
 
 guard let image = context.makeImage() else { fatalError("Nie udało się wyrenderować ikony") }
+
+// Zapis bez kanału alfa. App Store odbija ikony z przezroczystością błędem 90717.
+//
+// `NSBitmapImageRep(cgImage:)` wystarcza tylko dlatego, że kontekst wyżej jest
+// `noneSkipLast` — reprezentacja dziedziczy po nim brak alfy. Wcześniejsza wersja
+// przerysowywała obraz do reprezentacji 24-bitowej i wychodziła z tego czarna plama:
+// Core Graphics nie zna kontekstu o trzech bajtach na piksel, więc
+// `NSGraphicsContext(bitmapImageRep:)` zwracał nil, a rysowanie było pustą operacją.
 let bitmap = NSBitmapImageRep(cgImage: image)
+
+guard !bitmap.hasAlpha else {
+    fatalError("Ikona wyszła z kanałem alfa — App Store odrzuci ją błędem 90717")
+}
+
 guard let data = bitmap.representation(using: .png, properties: [:]) else {
     fatalError("Nie udało się zakodować PNG")
 }
 try data.write(to: URL(fileURLWithPath: outputPath))
-print("Zapisano \(outputPath)")
+print("Zapisano \(outputPath) — \(side)×\(side), bez kanału alfa")

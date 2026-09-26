@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- „app-store-connect” to jedyna droga do TestFlight. Nie oznacza publikacji
+         w App Store: build ląduje w TestFlight i zostaje tam, dopóki sam go nie
+         zgłosisz do sprzedaży. -->
+    <key>method</key>
+    <string>app-store-connect</string>
+    <key>destination</key>
+    <string>export</string>
+    <!-- Symbole debugowania jadą razem z paczką — bez nich raporty o awariach
+         z TestFlight są nieczytelnym stosem adresów. -->
+    <key>uploadSymbols</key>
+    <true/>
+    <!-- Numer wersji i builda ustawia nasz skrypt (liczba commitów). Gdyby Xcode
+         nimi zarządzał, nadpisałby to swoją własną numeracją. -->
+    <key>manageAppVersionAndBuildNumber</key>
+    <false/>
+</dict>
+</plist>

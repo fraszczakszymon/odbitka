@@ -11,3 +11,6 @@ Pixport.xcodeproj/
 
 # macOS
 .DS_Store
+
+# Paczki wydawnicze
+build/
